@@ -77,6 +77,37 @@ def gen_min_all(optim_type):
         logp = []
         qed = []
 
+       # Local search
+        my_file = open(pwd +  "/" + str(i) + "_DATA/" + "fitness_local_search.txt", 'r')
+        content = my_file.read()
+        content_list = content.split()
+        my_file.close()
+
+        d = 0
+        for j in range(len(content_list)):
+            if (j+3-d) % 3 == 0:
+                if len(content_list[j]) > 1:
+                    if content_list[j][0] == '[':
+                        qed.append(float(content_list[j][1:]))
+                    else:
+                        qed.append(float(content_list[j]))
+                else:
+                    d = d + 1
+                    continue
+            if (j+2-d) % 3 == 0:
+                if content_list[j][-1] == ']':
+                    logp.append(float(content_list[j][:-1]))
+                    d = d - 1
+                    continue
+                else:
+                    logp.append(float(content_list[j]))
+        
+        # Explore search
+        my_file = open(pwd +  "/" + str(i) + "_DATA/" + "fitness_explore.txt", 'r')
+        content = my_file.read()
+        content_list = content.split()
+        my_file.close()
+
         d = 0
         for j in range(len(content_list)):
             if (j+3-d) % 3 == 0:
