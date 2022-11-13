@@ -100,36 +100,18 @@ def fitness_function(smi):
     #cycle_val = num_long_cycles(mol)
     qed_val = qed(mol)
 
-    fitnesses = (qed_val, logp_val, sas_val)
+    fitnesses = (qed_val, sas_val, logp_val)
 
     return fitnesses
-'''
-def num_long_cycles(mol):
-    """Calculate the number of long cycles.
-    Args:
-        mol: Molecule. A molecule.
-    Returns:
-        negative cycle length.
-    """
-    cycle_list = nx.cycle_basis(nx.Graph(Chem.rdmolops.GetAdjacencyMatrix(mol)))
-    if not cycle_list:
-        cycle_length = 0
-    else:
-        cycle_length = max([len(j) for j in cycle_list])
-    if cycle_length <= 6:
-        cycle_length = 0
-    else:
-        cycle_length = cycle_length - 6
-    return cycle_length
-'''
+
 def main():
     print('name=main')
     params = generate_params()
 
-    properties = ['qed','logp', 'sas']
-    objectives = ['max', 'max', 'min']
+    properties = ['qed','sas', 'logp']
+    objectives = ['max', 'min', 'max']
     kind = 'Chimera'
-    supplement = [0.6,8,0]
+    supplement = [0.6,1.1,1000]
 
     agent = JANUS(
         work_dir='RESULTS', 
