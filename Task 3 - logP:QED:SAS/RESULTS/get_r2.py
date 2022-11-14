@@ -71,7 +71,7 @@ def compute_w_ref(optim_type):
 if __name__ == "__main__":
 
     hvs = []
-    optim_types = ['zinc','ctrl','random','newchim','hv']
+    optim_types = ['zinc','ctrl','random','chimera','newchim','hv']
 
     mode = 'r2'
     #mode = 'hv'
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 find_ref = compute_w_ref(optim_type)
                 abs_ref = [max(abs_ref[0],find_ref[0]),max(abs_ref[1],find_ref[1]),min(abs_ref[2],find_ref[2])]
 
-                for i in range(2,6):
+                for i in range(2,11):
                     optim_string = optim_type + str(i)
                     find_ref = compute_w_ref(optim_string)
                     abs_ref = [max(abs_ref[0],find_ref[0]),max(abs_ref[1],find_ref[1]),min(abs_ref[2],find_ref[2])]
@@ -107,11 +107,11 @@ if __name__ == "__main__":
         if optim_type == 'zinc':
             zinc_hv = compute_pareto(optim_type, abs_ref, mode)
             hvs_type.append(optim_type)
-            hvs_type.append(zinc_hv*5)
+            hvs_type.append(zinc_hv*10)
             hvs.append((hvs_type))
 
         else:
-            hv = compute_pareto(optim_typem, abs_ref, mode)
+            hv = compute_pareto(optim_type, abs_ref, mode)
             hvs_type.append(optim_type)
             hvs_type.append(hv)
 
