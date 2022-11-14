@@ -121,7 +121,7 @@ if __name__ == "__main__":
                 hvs_type.append(hv)
             hvs.append((hvs_type))
     
-    df_hvs = pd.DataFrame(hvs, columns =['optim_type','1','2','3','4','5'])
+    df_hvs = pd.DataFrame(hvs, columns =['optim_type','1','2','3','4','5','6','7','8','9','10'])
     df_hvs.to_csv("all_" + mode + ".csv")
 
 
