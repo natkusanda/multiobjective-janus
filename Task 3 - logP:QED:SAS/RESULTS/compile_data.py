@@ -131,6 +131,19 @@ def stack_mean_std(big_mat):
 
     return mindist
 # %%
+chimera_min = np.empty((10,100))
+chimera_min[0] = gen_min_all("chimera")
+chimera_min[1] = gen_min_all("chimera2")
+chimera_min[2] = gen_min_all("chimera3")
+chimera_min[3] = gen_min_all("chimera4")
+chimera_min[4] = gen_min_all("chimera5")
+chimera_min[5] = gen_min_all("chimera6")
+chimera_min[6] = gen_min_all("chimera7")
+chimera_min[7] = gen_min_all("chimera8")
+chimera_min[8] = gen_min_all("chimera9")
+chimera_min[9] = gen_min_all("chimera10")
+chim_mindist = stack_mean_std(chimera_min)
+# %%
 new_chim = np.empty((10,100))
 new_chim[0] = gen_min_all("newchim",newchim=True)
 new_chim[1] = gen_min_all("newchim2",newchim=True)
@@ -142,7 +155,7 @@ new_chim[6] = gen_min_all("newchim7",newchim=True)
 new_chim[7] = gen_min_all("newchim8",newchim=True)
 new_chim[8] = gen_min_all("newchim9",newchim=True)
 new_chim[9] = gen_min_all("newchim10",newchim=True)
-chim_mindist = stack_mean_std(new_chim)
+newchim_mindist = stack_mean_std(new_chim)
 # %%
 ctrl_min = np.empty((10,100))
 ctrl_min[0] = gen_min_all("ctrl")
@@ -183,7 +196,7 @@ rand_min[8] = gen_min_all("random9")
 rand_min[9] = gen_min_all("random10")
 rand_mindist = stack_mean_std(rand_min)
 # %% Plotting minimum distance
-def plot_shade(y1,y2,y3,y4,ext):
+def plot_shade(y1,y2,y3,y4,y5,ext):
     t = np.arange(1, 101, 1)
     fig = plt.figure(figsize=(10,8))
     ax = fig.add_subplot(111)
@@ -194,11 +207,13 @@ def plot_shade(y1,y2,y3,y4,ext):
     ax.plot(t, y2[:,0], color = 'C1')
     ax.plot(t, y3[:,0], color = 'C2')
     ax.plot(t, y4[:,0], color = 'C3')
+    ax.plot(t, y5[:,0], color = 'C4')
 
     ax.fill_between(t, y1[:,0] - y1[:,1], y1[:,0] + y1[:,1], color='C0', alpha=0.4)
     ax.fill_between(t, y2[:,0] - y2[:,1], y2[:,0] + y2[:,1], color='C1', alpha=0.4)
     ax.fill_between(t, y3[:,0] - y3[:,1], y3[:,0] + y3[:,1], color='C2', alpha=0.4)
     ax.fill_between(t, y4[:,0] - y4[:,1], y4[:,0] + y4[:,1], color='C3', alpha=0.4)
+    ax.fill_between(t, y5[:,0] - y5[:,1], y5[:,0] + y5[:,1], color='C4', alpha=0.4)
 
     ax.set_ylabel('Minimum Distance', fontsize=25) 
     ax.set_xlabel('Generation', fontsize=25)
@@ -206,7 +221,7 @@ def plot_shade(y1,y2,y3,y4,ext):
     ax.tick_params(labelcolor='black', labelsize='medium', width=3)
     plt.xticks(np.arange(0, 101, 10))
     plt.title("Minimum Distance to Utopian Point")
-    plt.legend(['Control','Random','Chimera','Hypervolume'], 
+    plt.legend(['Control','Random','Chimera A','Hypervolume', 'Chimera B'], 
         loc = 'best', prop={'size': 25})
     plt.savefig('utopia_' + ext + '.jpg', dpi = 400)
 # %%
@@ -269,9 +284,15 @@ def top_min_all(optim_type):
 
 
         smiles = list(df['smi'])
-        logp = list(df['logp'])
-        qed = list(df['qed'])
-        sas = list(df['sas'])
+        if optim_type == 'newchim':
+            logp = list(df['sas'])
+            qed = list(df['qed'])
+            sas = list(df['logp'])
+
+        else:
+            logp = list(df['logp'])
+            qed = list(df['qed'])
+            sas = list(df['sas'])
 
         data = np.column_stack((qed,logp,sas))
         utopia = np.array([0.6,10,1])
@@ -320,6 +341,9 @@ random_three[0],random_three[1],random_three[2],random_three[3],rand_smiles = to
 # %%
 hv_three = np.empty((4,30))
 hv_three[0],hv_three[1],hv_three[2],hv_three[3],hv_smiles = top_min_all('hv')
+# %%
+newchim_three = np.empty((4,30))
+newchim_three[0],newchim_three[1],newchim_three[2],newchim_three[3],newchim_smiles = top_min_all('newchim')
 # %%
 def top_zinc_pareto_points():
     min_distances = []
@@ -376,15 +400,17 @@ zinc_pareto = np.empty((4,30))
 zinc_pareto[0],zinc_pareto[1],zinc_pareto[2],zinc_pareto[3],zinc_smi = top_zinc_pareto_points()
 # %%
 df = {}
-df['qed'] = np.concatenate((ctrl_three[0],random_three[0],chim_three[0],hv_three[0]))
-df['logp'] = np.concatenate((ctrl_three[1],random_three[1],chim_three[1],hv_three[1]))
-df['sas'] = np.concatenate((ctrl_three[2],random_three[2],chim_three[2],hv_three[2]))
-df['type'] = np.concatenate((['WeightedSum']*30,['Random']*30,['Chimera']*30,['Hypervolume']*30))utop_df = {}
+df['qed'] = np.concatenate((ctrl_three[0],random_three[0],chim_three[0],hv_three[0],newchim_three[0]))
+df['logp'] = np.concatenate((ctrl_three[1],random_three[1],chim_three[1],hv_three[1],newchim_three[1]))
+df['sas'] = np.concatenate((ctrl_three[2],random_three[2],chim_three[2],hv_three[2],newchim_three[2]))
+df['type'] = np.concatenate((['WeightedSum']*30,['Random']*30,['Chimera A']*30,['Hypervolume']*30,['Chimera B']*30))
+
 utop_df = {}
 utop_df['qed'] = [0.6]
 utop_df['logp'] = [10]
 utop_df['sas'] = [1]
 utop_df['type'] = ['Utopian point']
+
 pareto_df = {}
 pareto_df['qed'] = zinc_pareto[0]
 pareto_df['logp'] = zinc_pareto[1]
@@ -401,8 +427,8 @@ def good_plot(ml_df, utop_df, pareto_df, arg1, arg2, ext, xlims, ylims):
     ax.axvline(0, linestyle="-", color='black')
     plt.title("Plot of molecules closest to utopian point")
 
-    markers = {"Zinc": 's',"Chimera": 'o',"WeightedSum": 'o',
-        "Random": 'o',"Hypervolume": 'o',"Utopian point": 'X'}
+    markers = {"Zinc": 's',"Chimera A": 'o',"WeightedSum": 'o',
+        "Random": 'o',"Hypervolume": 'o',"Chimera B": 'o',"Utopian point": 'X'}
     sns.scatterplot(data=ml_df, x=arg1, y=arg2, hue ='type', 
            legend ='full',style='type',markers=markers,s=60)
     sns.scatterplot(data=utop_df, x=arg1, y=arg2, hue='type',palette='gist_gray_r',
@@ -413,8 +439,8 @@ def good_plot(ml_df, utop_df, pareto_df, arg1, arg2, ext, xlims, ylims):
     ax.tick_params(axis='both', which='major', labelsize=20)
     ax.tick_params(axis='both', which='minor', labelsize=20)
 
-    ax.set_ylabel('QED', fontsize=20) 
-    ax.set_xlabel('logP', fontsize=20)
+    ax.set_xlabel(arg1, fontsize=20)
+    ax.set_ylabel(arg2, fontsize=20) 
     
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 

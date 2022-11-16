@@ -23,10 +23,16 @@ def compute_pareto(optim_type, w_ref, mode):
     else:
         df = pd.read_csv("RESULTS_" + optim_type + "/smiles_collector.csv")
 
-        smiles = list(df['smi'])
-        logp = list(df['logp'])
-        qed = list(df['qed'])
-        sas = list(df['sas'])
+        if optim_type == 'newchim':
+            smiles = list(df['smi'])
+            logp = list(df['sas'])
+            qed = list(df['qed'])
+            sas = list(df['logp'])
+        else:
+            smiles = list(df['smi'])
+            logp = list(df['logp'])
+            qed = list(df['qed'])
+            sas = list(df['sas'])
         
     idx = range(len(smiles))
     params = np.array([idx]).T
@@ -60,10 +66,17 @@ def compute_w_ref(optim_type):
 
     else:
         df = pd.read_csv("RESULTS_" + optim_type + "/smiles_collector.csv")
-        smiles = list(df['smi'])
-        logp = list(df['logp'])
-        qed = list(df['qed'])
-        sas = list(df['sas'])
+        
+        if optim_type == 'newchim':
+            smiles = list(df['smi'])
+            logp = list(df['sas'])
+            qed = list(df['qed'])
+            sas = list(df['logp'])
+        else:
+            smiles = list(df['smi'])
+            logp = list(df['logp'])
+            qed = list(df['qed'])
+            sas = list(df['sas'])
     
     return [max(logp), max(qed), min(sas)]
 
