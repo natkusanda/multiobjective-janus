@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import seaborn as sns
 
-from cairosvg import svg2png
+# from cairosvg import svg2png
 
 
 

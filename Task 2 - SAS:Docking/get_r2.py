@@ -107,22 +107,21 @@ if __name__ == "__main__":
     n_gen = 50      # number of generations
     n_run = 10      # number of repeated runs
     n_fitness = 2   # number of fitness dimensions (# of objectives)
-    threshold = 20.25 # 10.5 
+    threshold = 20.25
     threshold_docking = -100.0
-    
+
     # from previous run, worst point is:
     # w_ref = np.array([7.43576036, 152.4])
-    # worst in zinc_hv
-    w_ref = np.array([7.2234205, 3.9])
-    # import pdb; pdb.set_trace()
+    # best across all runs
+    w_ref = np.array([0.0, -20])  # SAS and docking utopian point
 
     # caluclate for zinc
     df_pareto = df[df['pareto'] == 1.0]
-    df_pareto = df_pareto[df_pareto['SAS'] < threshold]  # only look at points below 2.0
-    df_pareto = df_pareto[df_pareto['1oyt'] >= threshold_docking]  
+    df_pareto = df_pareto[df_pareto['SAS'] <= threshold]  # only look at points below 2.0
+    df_pareto = df_pareto[df_pareto['1oyt'] >= threshold_docking]  # only look at points below 2.0
     zinc_pareto = df_pareto[['SAS', '1oyt']].to_numpy()
-    zinc_hv = get_hypervolume(zinc_pareto, w_ref)
-    print(zinc_hv)
+    zinc_hv = get_r2(zinc_pareto, w_ref)
+    # print(zinc_hv)
 
     map_names = {
         'chimera': 'Chimera', 
@@ -132,7 +131,8 @@ if __name__ == "__main__":
     }
 
     all_df = []
-    res = {'Approach':[], 'run_id': [], 'Hypervolume': [], 'ref': []}
+    res = {'Approach':[], 'run_id': [], 'R2 Score': [], 'ref': []}
+    best_1oyt = np.inf
     for run in optim_types:
         for i in tqdm(range(n_run), desc=f'Currently running {run}'):
             # fig, ax = plt.subplots()
@@ -145,18 +145,23 @@ if __name__ == "__main__":
 
                 fitness = np.append(explore_fit, local_fit, axis=0)
                 all_fitness.append(fitness)
+                
+            # import pdb; pdb.set_trace()
 
             # all_fitness.append(df_pareto[['SAS', '1oyt']].to_numpy())
             all_fitness = np.concatenate(all_fitness, axis=0)
-            all_fitness = all_fitness[all_fitness[:,0] < threshold]
-            all_fitness = all_fitness[all_fitness[:,1] >= threshold_docking]
-            # print(all_fitness.shape)
+            # all_fitness = all_fitness[all_fitness[:,0] <= threshold]
+            # all_fitness = all_fitness[all_fitness[:,1] >= threshold_docking]
 
-            # import pdb; pdb.set_trace()
             pareto_front = get_pareto_info(all_fitness)
+            pareto_front = pareto_front[pareto_front[:,0] <= threshold]
+            pareto_front = pareto_front[pareto_front[:,1] >= threshold_docking]
             # pareto_front = compare_pareto(pareto_front, zinc_pareto)
-            hv = get_hypervolume(pareto_front, w_ref)
+            hv = get_r2(pareto_front, w_ref)
 
+            # for getting the best point as reference
+            if best_1oyt > all_fitness[:,1].min():
+                best_1oyt = all_fitness[:,1].min()
 
             # ax.scatter(pareto_front[:,0], pareto_front[:,1], label='run')
             # ax.scatter(zinc_pareto[:,0], zinc_pareto[:,1], label='ZINC')
@@ -167,78 +172,26 @@ if __name__ == "__main__":
             # n = fitness.shape[0]
             res['Approach'].append(map_names[run])
             res['run_id'].append(i)
-            res['Hypervolume'].append(hv)
+            res['R2 Score'].append(hv)
             res['ref'].append(w_ref)
             # all_df.append(pd.DataFrame(res))
+
+    print(f'best 1oyt across all runs: {best_1oyt}')
 
     # all_df = pd.concat(all_df)
     all_df = pd.DataFrame(res)
     # import pdb; pdb.set_trace()
 
     fig, ax = plt.subplots(figsize=(10,10))
-    sns.violinplot(data=all_df, x='Approach', y='Hypervolume', ax= ax)
+    sns.violinplot(data=all_df, x='Approach', y='R2 Score', ax= ax)
     # plt.axhline(y=1065.086811, label='ZINC_red average', linestyle='--')
     # plt.axhline(y=123.9069, label='ZINC_red average', linestyle='--')
-    plt.axhline(y=zinc_hv, label='ZINC_red average', linestyle='--', c='k')
-    ax.annotate('ZINC_red',xy=(1.0,zinc_hv - 2.0),fontsize=20)
-    plt.ylabel('Hypervolume', fontsize=20)
+    # plt.axhline(y=zinc_hv, label='ZINC_red average', linestyle='--', c='k')
+    # ax.annotate('ZINC_red',xy=(1.0,zinc_hv - 2.0),fontsize=20)
+    plt.ylabel('R2 score', fontsize=20)
     plt.xlabel('Approach', fontsize=20)
     plt.xticks(rotation=15)
     ax.tick_params(axis='both', which='major', labelsize=20)
 
-    plt.savefig('hv_violin.png', bbox_inches='tight')
-    # import pdb; pdb.set_trace()
-
-    # all_df['Hypervolume'].groupby('Approach').mean()
-
-    # import pdb; pdb.set_trace()
-    # worst_sas = df['SAS'].max()
-    # worst_docking = df['1oyt'].max()
-    # fitness = np.array(all_df['fitness'].tolist(), dtype=float)
-    # if fitness[:,0].max() > worst_sas:
-    #     print('Runs worst than ZINC for SAS')
-    #     worst_sas = fitness[:,0].max()
-    # if fitness[:,1].max() > worst_docking:
-    #     print('Runs worst than ZINC for docking')
-    #     worst_docking = fitness[:,1].max()
-    # w_ref = np.array([worst_sas, worst_docking])
-
-    
-    
-    # for run in optim_types:
-    #     tmp_df = all_df[all_df['run_type'] == run]
-
-    
-
-
-
-
-
-                
-
-
-
-
-
-####
-    #             hvs_type = [] 
-    #             print(optim_type)
-    #             hv = compute_pareto(optim_type)
-    #             hvs_type.append(optim_type)
-    #             hvs_type.append(hv)
-
-    #             for i in range(2,11):
-    #                 optim_string = optim_type + str(i)
-    #                 hv = compute_pareto(optim_string)
-    #                 hvs_type.append(hv)
-    #             hvs.append((hvs_type))
-    
-    # df_hvs = pd.DataFrame(hvs, columns =['optim_type','1','2','3','4','5','6','7','8','9','10'])
-    # df_hvs.to_csv("all_hvs.csv")
-
-
-
-
-# %%
-
+    plt.savefig('r2_violin.png', bbox_inches='tight')
 
