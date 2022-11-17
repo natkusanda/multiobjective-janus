@@ -23,7 +23,8 @@ def compute_pareto(optim_type, w_ref, mode):
     else:
         df = pd.read_csv("RESULTS_" + optim_type + "/smiles_collector.csv")
 
-        if optim_type == 'newchim':
+        if optim_type[:7] == 'newchim': 
+            # account for error in smiles_collector generation
             smiles = list(df['smi'])
             logp = list(df['sas'])
             qed = list(df['qed'])
@@ -67,7 +68,7 @@ def compute_w_ref(optim_type):
     else:
         df = pd.read_csv("RESULTS_" + optim_type + "/smiles_collector.csv")
         
-        if optim_type == 'newchim':
+        if optim_type[:7] == 'newchim':
             smiles = list(df['smi'])
             logp = list(df['sas'])
             qed = list(df['qed'])
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         if optim_type == 'zinc':
             zinc_hv = compute_pareto(optim_type, abs_ref, mode)
             hvs_type.append(optim_type)
-            hvs_type.append(zinc_hv*10)
+            hvs_type.append(zinc_hv)
             hvs.append((hvs_type))
 
         else:
