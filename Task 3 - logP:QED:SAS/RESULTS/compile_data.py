@@ -229,38 +229,57 @@ plot_shade(ctrl_mindist,rand_mindist,chim_mindist,hv_mindist,'1')
 # %%
 # %%
 '''
-Task 2: Plotting R2 of Pareto fronts
+Task 2: Plotting HV, R2 of Pareto fronts
 '''
-df = pd.read_csv(pwd + "all_r2.csv")
+df = pd.read_csv("all_r2.csv")
 all_r2 = np.empty((10,4))
-all_r2[0] = list(df['1'])[:4]
-all_r2[1] = list(df['2'])[:4]
-all_r2[2] = list(df['3'])[:4]
-all_r2[3] = list(df['4'])[:4]
-all_r2[4] = list(df['5'])[:4]
-all_r2[5] = list(df['6'])[:4]
-all_r2[6] = list(df['7'])[:4]
-all_r2[7] = list(df['8'])[:4]
-all_r2[8] = list(df['9'])[:4]
-all_r2[9] = list(df['10'])[:4]
+all_r2 = np.empty((10,5))
+all_r2[0] = list(df['1'])[1:]
+all_r2[1] = list(df['2'])[1:]
+all_r2[2] = list(df['3'])[1:]
+all_r2[3] = list(df['4'])[1:]
+all_r2[4] = list(df['5'])[1:]
+all_r2[5] = list(df['6'])[1:]
+all_r2[6] = list(df['7'])[1:]
+all_r2[7] = list(df['8'])[1:]
+all_r2[8] = list(df['9'])[1:]
+all_r2[9] = list(df['10'])[1:]
+
+df = pd.read_csv(pwd + "all_hv.csv")
+all_hv = np.empty((10,5))
+all_hv[0] = list(df['1'])[1:]
+all_hv[1] = list(df['2'])[1:]
+all_hv[2] = list(df['3'])[1:]
+all_hv[3] = list(df['4'])[1:]
+all_hv[4] = list(df['5'])[1:]
+all_hv[5] = list(df['6'])[1:]
+all_hv[6] = list(df['7'])[1:]
+all_hv[7] = list(df['8'])[1:]
+all_hv[8] = list(df['9'])[1:]
+all_hv[9] = list(df['10'])[1:]
 # %%
 df = {}
-volumes = np.row_stack((all_hv[:,0],all_hv[:,1],all_hv[:,2],all_hv[:,3]))
-types = np.row_stack((["WeightedSum"]*10,["Random"]*10,["Chimera"]*10,["Hypervolume"]*10))
-df["r2"] = volumes.flatten()
+hvolumes = np.row_stack((all_hv[:,0],all_hv[:,1],all_hv[:,2],all_hv[:,3],all_hv[:,4]))
+rvolumes = np.row_stack((all_r2[:,0],all_r2[:,1],all_r2[:,2],all_r2[:,3],all_r2[:,4]))
+types = np.row_stack((["WeightedSum"]*10,["Random"]*10,["Chimera A"]*10,["Chimera B"]*10,["Hypervolume"]*10))
+df["r2"] = rvolumes.flatten()
+df["hv"] = hvolumes.flatten()
 df["type"] = types.flatten()
 # %% Violin plot
+mode = "r2"
+#mode = "hv"
 dframe = pd.DataFrame(data=df)
-mean_dframe = pd.DataFrame(data=mean_df)
 fig = plt.figure(figsize=(10,10))
 ax = fig.add_subplot(111)
-plt.savefig('hv_of_pareto_violin.png')
-sns.violinplot(data=dframe, x="type", y="r2")
-plt.ylabel('R2', fontsize=20)
+sns.violinplot(data=dframe, x="type", y=mode)
+plt.axhline(y=0.25258,color='black', label = 'ZINC_red average',linestyle='--')
+ax.annotate('ZINC_red',xy=(3.1,0.254),fontsize=20)
+
+plt.ylabel(mode, fontsize=20)
 plt.xlabel('Approach', fontsize=20)
 plt.xticks(rotation = 15)
 ax.tick_params(axis='both', which='major', labelsize=20)
-plt.savefig('r2_of_pareto_violin.png')
+plt.savefig(mode + 'of_pareto_violin.png')
 # %%
 '''
 Task 3: Plotting closest molecules to utopian point
@@ -399,60 +418,36 @@ def top_zinc_pareto_points():
 zinc_pareto = np.empty((4,30))
 zinc_pareto[0],zinc_pareto[1],zinc_pareto[2],zinc_pareto[3],zinc_smi = top_zinc_pareto_points()
 # %%
-df = {}
-df['qed'] = np.concatenate((ctrl_three[0],random_three[0],chim_three[0],hv_three[0],newchim_three[0]))
-df['logp'] = np.concatenate((ctrl_three[1],random_three[1],chim_three[1],hv_three[1],newchim_three[1]))
-df['sas'] = np.concatenate((ctrl_three[2],random_three[2],chim_three[2],hv_three[2],newchim_three[2]))
-df['type'] = np.concatenate((['WeightedSum']*30,['Random']*30,['Chimera A']*30,['Hypervolume']*30,['Chimera B']*30))
+utop = [0.6,10,1]
+import matplotlib.pyplot as plt
+import numpy as np
+fig = plt.figure(figsize=(12,12))
+ax = plt.subplot(111,projection='3d')
 
-utop_df = {}
-utop_df['qed'] = [0.6]
-utop_df['logp'] = [10]
-utop_df['sas'] = [1]
-utop_df['type'] = ['Utopian point']
+ax.scatter(ctrl_three[0],ctrl_three[1],ctrl_three[2],marker='o',label="WeightedSum",s=100)
+ax.scatter(random_three[0],random_three[1],random_three[2],marker='o',label="Random",s=100)
+ax.scatter(chim_three[0],chim_three[1],chim_three[2],marker='o',label="Chimera A",s=100)
+ax.scatter(newchim_three[0],newchim_three[1],newchim_three[2],marker='o',label="Chimera B",s=100)
+ax.scatter(hv_three[0],hv_three[1],hv_three[2],marker='o',label="Hypervolume",s=100)
 
-pareto_df = {}
-pareto_df['qed'] = zinc_pareto[0]
-pareto_df['logp'] = zinc_pareto[1]
-pareto_df['sas'] = zinc_pareto[2]
-pareto_df['type'] = ['Zinc'] * 30
-# %%
-def good_plot(ml_df, utop_df, pareto_df, arg1, arg2, ext, xlims, ylims):
-    fig = plt.figure(figsize=(8,8))
-    ax = fig.add_subplot(111)
+ax.scatter(utop[0],utop[1],utop[2],marker='X',label="Utopian Point",s=500)
+ax.scatter(zinc_pareto[0],zinc_pareto[1],zinc_pareto[2],marker='^',label="Zinc",s=100)
 
-    ax.set_xlim(xlims)
-    ax.set_ylim(ylims)
-    ax.axhline(0, linestyle="-", color='black')
-    ax.axvline(0, linestyle="-", color='black')
-    plt.title("Plot of molecules closest to utopian point")
+#ax.plot_surface(zinc_pareto[0],zinc_pareto[1],zz)
+ax.plot_trisurf(zinc_pareto[0],zinc_pareto[1],zinc_pareto[2],alpha=0.2,color='pink')
 
-    markers = {"Zinc": 's',"Chimera A": 'o',"WeightedSum": 'o',
-        "Random": 'o',"Hypervolume": 'o',"Chimera B": 'o',"Utopian point": 'X'}
-    sns.scatterplot(data=ml_df, x=arg1, y=arg2, hue ='type', 
-           legend ='full',style='type',markers=markers,s=60)
-    sns.scatterplot(data=utop_df, x=arg1, y=arg2, hue='type',palette='gist_gray_r',
-           legend ='full',style='type',markers=markers,s=500)
-    sns.lineplot(data=pareto_df, x=arg1, y=arg2, hue ='type',palette='Purples', sizes=(50,50),
-           legend ='full',style='type',markers=markers,markersize=10)
-    plt.legend(loc = 'best', prop={'size': 20})
-    ax.tick_params(axis='both', which='major', labelsize=20)
-    ax.tick_params(axis='both', which='minor', labelsize=20)
-
-    ax.set_xlabel(arg1, fontsize=20)
-    ax.set_ylabel(arg2, fontsize=20) 
-    
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-
-    plt.savefig("utopia" + arg1 + '_' + arg2 + '_' + ext + '.png',dpi = 800)
-# %%
-ml_df = pd.DataFrame(df)
-u_df = pd.DataFrame(utop_df)
-p_df = pd.DataFrame(pareto_df)
-#%%
-good_plot(ml_df, u_df, p_df, 'logp','qed','nu_close_plot',[2,10.5],[0,1.2])
-good_plot(ml_df, u_df, p_df, 'logp','sas','nu_close_plot',[2,10.5],[0,2])
-good_plot(ml_df, u_df, p_df, 'qed','sas','nu_close_plot',[0,1],[0,2])
+ax.set_xlabel('qed',fontsize=20)
+ax.set_ylabel('logP',fontsize=20)
+ax.set_zlabel('SAS',fontsize=20)
+ax.set_xlim([0.3,1])
+ax.set_ylim([4,10])
+ax.set_zlim([1,1.5])
+ax.tick_params(axis='both', which='major', labelsize=18)
+#ax.tick_params(axis='both', which='minor', labelsize=20)
+ax.view_init(30,225)
+plt.legend(['WeightedSum','Random','Chimera A','Chimera B','Hypervolume',"Utopian Point",'Zinc'])
+plt.legend(loc="upper left",prop={'size': 20})
+plt.savefig("utopia_logp_qed_sas.png",dpi = 800)
 
 # %%
 '''
@@ -463,13 +458,16 @@ def visualise_grid(optim_smiles,optim_data,optim_type):
     subms = [Chem.MolFromSmiles(x) for x in optim_smiles]
     legends = []
     for i in range(len(optim_smiles)):
-        
-        qed_str = "QED: {:.2f}".format(optim_data[0][i])
-        logp_str = "logP: {:.2f}".format(optim_data[1][i])
 
-        #legend = chim_smiles[i] + "\n" * 5 + qed_str + "\n" * 5 + logp_str
-        legend = qed_str + "\n" * 5 + logp_str
-        legends.append(legend)
+        if optim_smiles[i] not in all_smi:
+            all_smi.append(optim_smiles[i])
+            subms.append(Chem.MolFromSmiles(optim_smiles[i]))
+        
+            qed_str = "QED: {:.2f}".format(optim_data[0][i])
+            logp_str = "logP: {:.2f}".format(optim_data[1][i])
+            sas_str = "SAS {:.2f}".format(optim_data[2][i])
+            legend = qed_str + "\n" * 5 + logp_str + "\n" * 5 + sas_str
+            legends.append(legend)
     
     d2d = Chem.Draw.MolDraw2DSVG(600 * 5, 600 * 2, 600, 600)
     d2d.drawOptions().addStereoAnnotation=True
@@ -484,3 +482,4 @@ visualise_grid(chim_smiles,chim_three,'chimera')
 visualise_grid(ctrl_smiles,ctrl_three,'ctrl')
 visualise_grid(rand_smiles,random_three,'random')
 visualise_grid(hv_smiles,hv_three,'hv')
+visualise_grid(newchim_smiles,newchim_three,'newchim')
